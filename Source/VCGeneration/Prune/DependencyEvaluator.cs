@@ -26,9 +26,7 @@ namespace Microsoft.Boogie
 
     protected void AddIncoming(Declaration newIncoming)
     {
-      if (QKeyValue.FindBoolAttribute(declaration.Attributes, "include_dep")) {
-        incomingSets.Add(new[] { newIncoming });
-      }
+      incomingSets.Add(new[] { newIncoming });
     }
 
     protected void AddOutgoing(Declaration newOutgoing)

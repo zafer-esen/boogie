@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 
@@ -6,7 +7,14 @@ namespace Microsoft.Boogie
 {
   internal class AxiomVisitor : DependencyEvaluator
   {
-    public AxiomVisitor (Axiom a) : base(a) {}
+    private HashSet<String> usedBySymbols;
+
+    public AxiomVisitor(Axiom a) : base(a)
+    {
+      var usedByAttribute = QKeyValue.FindStringAttribute(declaration.Attributes, "used_by");
+      // TODO: note - used by symbols should be updated during monomorphization or this would not work!
+      usedBySymbols = usedByAttribute?.Split(',').Select(s => s.Trim()).ToHashSet();
+    }
 
     public static DependencyEvaluator GetDependencies(Axiom axiom)
     {
@@ -24,12 +32,21 @@ namespace Microsoft.Boogie
       AddIncoming(incomingSet);
     }
 
+    void TryAddIncoming(NamedDeclaration newIncoming)
+    {
+      if (QKeyValue.FindBoolAttribute(declaration.Attributes, "include_dep") || 
+          usedBySymbols != null && usedBySymbols.Contains(newIncoming.Name))
+      {
+        AddIncoming(newIncoming);
+      }
+    }
+
     public override Expr VisitExpr(Expr node) {
       if (node is IdentifierExpr iExpr && iExpr.Decl is Constant c) {
-        AddIncoming(c);
+        TryAddIncoming(c);
         AddOutgoing(c);
       } else if (node is NAryExpr e && e.Fun is FunctionCall f) {
-        AddIncoming(f.Func);
+        TryAddIncoming(f.Func);
         AddOutgoing(f.Func);
       } else if (node is NAryExpr n) {
         var applicable = n.Fun;
