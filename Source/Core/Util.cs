@@ -15,7 +15,10 @@ namespace Microsoft.Boogie
     
     public static string EscapeFilename(string fn)
     {
-      return fn.Replace(':', '-').Replace('/', '-').Replace('\\', '-');
+      return fn.Replace(':', '-')
+        .Replace('/', '-')
+        .Replace('\\', '-')
+        .Replace('$', '-');
     }
     
     public static int GetHashCode<T1, T2>(T1 arg1, T2 arg2)

@@ -160,7 +160,12 @@ namespace VC
 
         foreach (var declaration in (TopLevelDeclarations ?? program.TopLevelDeclarations).
                  Except(functionAxioms.Concat(constantAxioms)).ToList()) {
-          declaration.Emit(writer, 0);
+          var isOtherProcedureOrImpl = declaration is DeclWithFormals d && (d is Implementation || d is Procedure) && 
+                           d.Name != implementation.Name;
+          if (!isOtherProcedureOrImpl)
+          {
+            declaration.Emit(writer, 0);
+          }
         }
 
         writer.Close();
